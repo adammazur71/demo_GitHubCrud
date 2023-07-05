@@ -1,5 +1,6 @@
 package com.example.demo.repository.client;
 
+import com.example.demo.repository.RepositoryController;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.client.RestTemplate;
