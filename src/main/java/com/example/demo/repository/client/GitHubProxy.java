@@ -1,7 +1,5 @@
 package com.example.demo.repository.client;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpMethod;
@@ -21,9 +19,9 @@ public class GitHubProxy {
         this.restTemplate = restTemplate;
     }
 
-        public List<GitHubResponseDto> downloadUsersRepos(String userName) {
+        public List<UserProjectsData> downloadUsersRepos(String userName) {
         String uri = "https://api.github.com/users/" + userName + "/repos";
-        ResponseEntity<List<GitHubResponseDto>> response = restTemplate.exchange(
+        ResponseEntity<List<UserProjectsData>> response = restTemplate.exchange(
                 uri,
                 HttpMethod.GET,
                 null,
@@ -32,8 +30,31 @@ public class GitHubProxy {
         );
         return response.getBody();
     }
+//    public GitHubResponseDto downloadUsersRepos(String userName) {
+//        String uri = "https://api.github.com/users/" + userName + "/repos";
+//        ResponseEntity<GitHubResponseDto> response = restTemplate.exchange(
+//                uri,
+//                HttpMethod.GET,
+//                null,
+//                new ParameterizedTypeReference<>() {
+//                }
+//        );
+//        return response.getBody();
+//    }
+//    public GitHubResponseDto downloadUsersRepos(String userName) throws JsonProcessingException {
+//        String uri = "https://api.github.com/users/" + userName + "/repos";
+//        ResponseEntity<String> response = restTemplate.exchange(
+//                uri,
+//                HttpMethod.GET,
+//                null,
+//                String.class
+//        );
+//        String json = response.getBody();
+//        ObjectMapper objectMapper = new ObjectMapper();
+//        GitHubResponseDto gitHubResponseDto = objectMapper.readValue(json, GitHubResponseDto.class);
+//        return gitHubResponseDto;
+//    }
 
-//    https://api.github.com/repos/kalqa/LottoExcelentLKopka/branches
     public List<GitHubBranchInfoResponseDto> downloadUsersReposBranchesInfo (String userName, String projectName) {
         String uri = "https://api.github.com/repos/" + userName + "/" + projectName + "/branches";
         ResponseEntity<List<GitHubBranchInfoResponseDto>> response = restTemplate.exchange(
