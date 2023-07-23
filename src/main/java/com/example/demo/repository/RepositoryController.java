@@ -18,9 +18,9 @@ public class RepositoryController {
     List<ProjectInfoDto> cache = new ArrayList<>();
     @Autowired
 
-    public RepositoryController(RepositoryService repositoryService, GitHubRepository gitHubRepository) {
+    public RepositoryController(RepositoryService repositoryService) {
         this.repositoryService = repositoryService;
-        this.gitHubRepository = gitHubRepository;
+
     }
 
     GitHubRepository gitHubRepository;
@@ -36,7 +36,8 @@ public class RepositoryController {
     }
     @GetMapping(value = "/repos", produces = MediaType.APPLICATION_JSON_VALUE)
     public void showRepos(){
-        List<RespositoryEntity> all = gitHubRepository.findAll();
+        List<RepositoryEntity> all = repositoryService.findAll();
         System.out.println(all);
     }
+
 }

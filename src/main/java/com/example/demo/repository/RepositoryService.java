@@ -3,25 +3,27 @@ package com.example.demo.repository;
 import com.example.demo.repository.client.GitHubBranchInfoResponseDto;
 import com.example.demo.repository.client.GitHubProxy;
 import com.example.demo.repository.client.UserProjectsData;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.stream.Collectors;
+
 @Service
 
 public class RepositoryService {
 
     private final GitHubProxy gitHubProxy;
-    public RepositoryService(GitHubProxy gitHubProxy) {
+    private final GitHubRepository gitHubRepository;
+
+    public RepositoryService(GitHubProxy gitHubProxy, GitHubRepository gitHubRepository) {
         this.gitHubProxy = gitHubProxy;
+        this.gitHubRepository = gitHubRepository;
     }
 
-   public List<ProjectInfoDto> projectInfoDtos(String username){
-       List<UserProjectsData> response = makeGitHubRequestForUserProjects(username);
-       return generateProjectInfoDtos(response, username);
-   }
+    public List<ProjectInfoDto> projectInfoDtos(String username) {
+        List<UserProjectsData> response = makeGitHubRequestForUserProjects(username);
+        return generateProjectInfoDtos(response, username);
+    }
 
     private List<UserProjectsData> makeGitHubRequestForUserProjects(String userName) {
         return gitHubProxy.downloadUsersRepos(userName);
@@ -43,6 +45,8 @@ public class RepositoryService {
                 .map(branchWithRepoNameDto -> new ProjectInfoDto(branchWithRepoNameDto.repoName(), username, branchWithRepoNameDto.branchesDto()))
                 .collect(Collectors.toList());
     }
-
+    public List<RepositoryEntity> findAll(){
+        return gitHubRepository.findAll();
+    }
 
 }

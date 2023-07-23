@@ -1,20 +1,20 @@
 package com.example.demo.repository;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
+import jakarta.persistence.*;
 
 
 @Entity
-public class RespositoryEntity {
+@Table(name = "Entity")
+public class RepositoryEntity {
     @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     Long id;
     @Column(nullable = false)
     String owner;
     @Column(nullable = false)
     String name;
 
-    public RespositoryEntity() {
+    public RepositoryEntity() {
     }
 
     @Override
@@ -26,7 +26,7 @@ public class RespositoryEntity {
                 '}';
     }
 
-    public RespositoryEntity(String owner, String name) {
+    public RepositoryEntity(String owner, String name) {
         this.owner = owner;
         this.name = name;
     }
