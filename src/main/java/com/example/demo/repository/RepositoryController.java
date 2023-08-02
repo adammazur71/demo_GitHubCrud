@@ -34,10 +34,11 @@ public class RepositoryController {
         cache = projectInfoDtos;
         return ResponseEntity.ok(new RepositoryResponseDto(projectInfoDtos));
     }
-    @GetMapping(value = "/repos", produces = MediaType.APPLICATION_JSON_VALUE)
-    public void showRepos(){
-        List<RepositoryEntity> all = repositoryService.findAll();
-        System.out.println(all);
+    @GetMapping(value = "/repos", produces = "application/json" /*MediaType.APPLICATION_JSON_VALUE*/)
+    public ResponseEntity<DbResponseSelectAllDto> showRepos(){
+        List<DbProjectsInfoDto> all = repositoryService.findAll();
+        DbResponseSelectAllDto response = new DbResponseSelectAllDto(all);
+        return ResponseEntity.ok(response);
     }
 
 }

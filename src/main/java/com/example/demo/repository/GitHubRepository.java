@@ -5,5 +5,5 @@ import org.springframework.data.repository.ListCrudRepository;
 import java.util.List;
 
 public interface GitHubRepository extends ListCrudRepository <RepositoryEntity, Long> {
-//List<RepositoryEntity> findAllBy();
+List<RepositoryEntity> findAll();
 }
