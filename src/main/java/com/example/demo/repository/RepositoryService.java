@@ -45,11 +45,9 @@ public class RepositoryService {
                 .map(branchWithRepoNameDto -> new ProjectInfoDto(branchWithRepoNameDto.repoName(), username, branchWithRepoNameDto.branchesDto()))
                 .collect(Collectors.toList());
     }
-    public List<DbProjectsInfoDto> findAll(){
-        List<RepositoryEntity> repositoryEntities = gitHubRepository.findAll();
-        return repositoryEntities.stream()
-                .map(repositoryEntity -> new DbProjectsInfoDto(repositoryEntity.getId(), repositoryEntity.getOwner(), repositoryEntity.getName()))
-                .collect(Collectors.toList());
-    }
 
+    public List<RepositoryEntity> findAll() {
+        return gitHubRepository.findAll();
+
+    }
 }

@@ -16,14 +16,13 @@ public class RepositoryController {
 
     RepositoryService repositoryService;
     List<ProjectInfoDto> cache = new ArrayList<>();
+
     @Autowired
 
     public RepositoryController(RepositoryService repositoryService) {
         this.repositoryService = repositoryService;
 
     }
-
-    GitHubRepository gitHubRepository;
 
     @GetMapping(value = "/{username}", produces = "application/json")
     public ResponseEntity<RepositoryResponseDto> hello(@PathVariable String username) {
@@ -34,11 +33,11 @@ public class RepositoryController {
         cache = projectInfoDtos;
         return ResponseEntity.ok(new RepositoryResponseDto(projectInfoDtos));
     }
-    @GetMapping(value = "/repos", produces = "application/json" /*MediaType.APPLICATION_JSON_VALUE*/)
-    public ResponseEntity<DbResponseSelectAllDto> showRepos(){
-        List<DbProjectsInfoDto> all = repositoryService.findAll();
-        DbResponseSelectAllDto response = new DbResponseSelectAllDto(all);
-        return ResponseEntity.ok(response);
+
+    @GetMapping(value = "/repos", produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<List<RepositoryEntity>> showRepos() {
+        List<RepositoryEntity> all = repositoryService.findAll();
+        return ResponseEntity.ok(all);
     }
 
 }
