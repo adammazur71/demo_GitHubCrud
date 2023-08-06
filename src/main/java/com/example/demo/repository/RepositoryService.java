@@ -57,4 +57,7 @@ public class RepositoryService {
     public Optional<RepositoryEntity> findById(Long id) {
         return gitHubRepository.findById(id);
     }
+    public RepositoryEntity save(RepositoryEntity entity){
+        return gitHubRepository.save(entity);
+    }
 }

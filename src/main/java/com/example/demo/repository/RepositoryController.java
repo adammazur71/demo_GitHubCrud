@@ -1,14 +1,13 @@
 package com.example.demo.repository;
 
 import com.example.demo.repository.dto.ProjectInfoDto;
+import com.example.demo.repository.dto.ProjectRequestDto;
 import com.example.demo.repository.dto.RepositoryResponseDto;
 import com.example.demo.repository.exceptions.IdNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -42,13 +41,18 @@ public class RepositoryController {
         return ResponseEntity.ok(all);
     }
 
-    @GetMapping(value = "/id/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
+    @GetMapping(value = "/repos/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<RepositoryEntity> showById(@PathVariable Long id) throws IdNotFoundException {
         RepositoryEntity resultById = repositoryService.findById(id)
                 .orElseThrow(() -> new IdNotFoundException("Result with id " + id + " not found"));
 //        if (resultById.isPresent())
             return ResponseEntity.ok(resultById);
 //        else throw new IdNotFoundException("Result with id " + id + " not found");
+    }
+    @PostMapping(value = "/repos")
+    public ResponseEntity<RepositoryEntity> saveProject(@RequestBody ProjectRequestDto request){
+        RepositoryEntity savedProject = repositoryService.save(new RepositoryEntity(request.owner(), request.name()));
+        return ResponseEntity.ok(savedProject);
     }
 
 }
