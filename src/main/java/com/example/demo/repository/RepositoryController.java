@@ -1,5 +1,7 @@
 package com.example.demo.repository;
 
+import com.example.demo.repository.dto.ProjectInfoDto;
+import com.example.demo.repository.dto.RepositoryResponseDto;
 import com.example.demo.repository.exceptions.IdNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;

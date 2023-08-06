@@ -1,5 +1,7 @@
 package com.example.demo.repository.client;
 
+import com.example.demo.repository.client.dto.GitHubBranchInfoResponseDto;
+import com.example.demo.repository.client.dto.UserProjectsData;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.ParameterizedTypeReference;

@@ -1,8 +1,11 @@
 package com.example.demo.repository;
 
-import com.example.demo.repository.client.GitHubBranchInfoResponseDto;
+import com.example.demo.repository.client.dto.GitHubBranchInfoResponseDto;
 import com.example.demo.repository.client.GitHubProxy;
-import com.example.demo.repository.client.UserProjectsData;
+import com.example.demo.repository.client.dto.UserProjectsData;
+import com.example.demo.repository.dto.BranchDto;
+import com.example.demo.repository.dto.BranchWithRepoNameDto;
+import com.example.demo.repository.dto.ProjectInfoDto;
 import org.springframework.stereotype.Service;
 
 import java.util.List;

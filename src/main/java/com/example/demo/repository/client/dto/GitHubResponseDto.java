@@ -1,4 +1,4 @@
-package com.example.demo.repository.client;
+package com.example.demo.repository.client.dto;
 
 import java.util.List;
 

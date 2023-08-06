@@ -1,4 +1,4 @@
-package com.example.demo.repository.client;
+package com.example.demo.repository.client.dto;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
