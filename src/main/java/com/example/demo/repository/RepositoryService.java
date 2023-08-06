@@ -6,6 +6,7 @@ import com.example.demo.repository.client.UserProjectsData;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -49,5 +50,8 @@ public class RepositoryService {
     public List<RepositoryEntity> findAll() {
         return gitHubRepository.findAll();
 
+    }
+    public Optional<RepositoryEntity> findById(Long id) {
+        return gitHubRepository.findById(id);
     }
 }
