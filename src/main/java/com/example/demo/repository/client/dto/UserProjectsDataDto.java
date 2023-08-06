@@ -4,5 +4,6 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 
-public record GitHubRepositoryOwner(String login) {
+
+public record UserProjectsDataDto(GitHubRepositoryOwnerDto owner, String name, boolean fork) {
 }

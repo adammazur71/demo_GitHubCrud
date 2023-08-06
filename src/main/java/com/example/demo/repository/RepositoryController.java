@@ -1,5 +1,6 @@
 package com.example.demo.repository;
 
+import com.example.demo.repository.client.dto.UserProjectsDataDto;
 import com.example.demo.repository.dto.ProjectInfoDto;
 import com.example.demo.repository.dto.ProjectRequestDto;
 import com.example.demo.repository.dto.RepositoryResponseDto;
@@ -35,6 +36,14 @@ public class RepositoryController {
         return ResponseEntity.ok(new RepositoryResponseDto(projectInfoDtos));
     }
 
+    @GetMapping(value = "/save2db/{username}", produces = "application/json")
+    public ResponseEntity<List<RepositoryEntity>> saveRepos2db(@PathVariable String username) {
+        List<UserProjectsDataDto> projectInfoDtos = repositoryService.makeGitHubRequestForUserProjects(username);
+        List<RepositoryEntity> savedRequests = repositoryService.saveProjectInfo2DB(projectInfoDtos);
+        return ResponseEntity.ok(savedRequests);
+    }
+
+
     @GetMapping(value = "/repos", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<List<RepositoryEntity>> showRepos() {
         List<RepositoryEntity> all = repositoryService.findAll();
@@ -45,12 +54,11 @@ public class RepositoryController {
     public ResponseEntity<RepositoryEntity> showById(@PathVariable Long id) throws IdNotFoundException {
         RepositoryEntity resultById = repositoryService.findById(id)
                 .orElseThrow(() -> new IdNotFoundException("Result with id " + id + " not found"));
-//        if (resultById.isPresent())
-            return ResponseEntity.ok(resultById);
-//        else throw new IdNotFoundException("Result with id " + id + " not found");
+        return ResponseEntity.ok(resultById);
     }
+
     @PostMapping(value = "/repos")
-    public ResponseEntity<RepositoryEntity> saveProject(@RequestBody ProjectRequestDto request){
+    public ResponseEntity<RepositoryEntity> saveProject(@RequestBody ProjectRequestDto request) {
         RepositoryEntity savedProject = repositoryService.save(new RepositoryEntity(request.owner(), request.name()));
         return ResponseEntity.ok(savedProject);
     }

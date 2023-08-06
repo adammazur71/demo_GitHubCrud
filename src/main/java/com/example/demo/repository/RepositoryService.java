@@ -1,8 +1,8 @@
 package com.example.demo.repository;
 
-import com.example.demo.repository.client.dto.GitHubBranchInfoResponseDto;
 import com.example.demo.repository.client.GitHubProxy;
-import com.example.demo.repository.client.dto.UserProjectsData;
+import com.example.demo.repository.client.dto.GitHubBranchInfoResponseDto;
+import com.example.demo.repository.client.dto.UserProjectsDataDto;
 import com.example.demo.repository.dto.BranchDto;
 import com.example.demo.repository.dto.BranchWithRepoNameDto;
 import com.example.demo.repository.dto.ProjectInfoDto;
@@ -24,13 +24,35 @@ public class RepositoryService {
         this.gitHubRepository = gitHubRepository;
     }
 
+    public List<RepositoryEntity> findAll() {
+        return gitHubRepository.findAll();
+
+    }
+
+    public Optional<RepositoryEntity> findById(Long id) {
+        return gitHubRepository.findById(id);
+    }
+
+    public RepositoryEntity save(RepositoryEntity entity) {
+        return gitHubRepository.save(entity);
+    }
+
+    public List<RepositoryEntity> saveAll(List<RepositoryEntity> entities) {
+        return gitHubRepository.saveAll(entities);
+    }
+
     public List<ProjectInfoDto> projectInfoDtos(String username) {
-        List<UserProjectsData> response = makeGitHubRequestForUserProjects(username);
+        List<UserProjectsDataDto> response = makeGitHubRequestForUserProjects(username);
         return generateProjectInfoDtos(response, username);
     }
 
-    private List<UserProjectsData> makeGitHubRequestForUserProjects(String userName) {
+    public List<UserProjectsDataDto> makeGitHubRequestForUserProjects(String userName) {
         return gitHubProxy.downloadUsersRepos(userName);
+    }
+
+    public List<RepositoryEntity> saveProjectInfo2DB(List<UserProjectsDataDto> userProjectsData) {
+        List<RepositoryEntity> projects2save = generateRepositoryEntityList(userProjectsData);
+        return saveAll(projects2save);
     }
 
     private BranchWithRepoNameDto retrieveBranchesForProject(String userName, String projectName) {
@@ -42,7 +64,7 @@ public class RepositoryService {
         return new BranchWithRepoNameDto(branchDtos, projectName);
     }
 
-    private List<ProjectInfoDto> generateProjectInfoDtos(List<UserProjectsData> userProjectsData, String username) {
+    private List<ProjectInfoDto> generateProjectInfoDtos(List<UserProjectsDataDto> userProjectsData, String username) {
         return userProjectsData.stream()
                 .filter(projectsData -> !projectsData.fork())
                 .map(projectsData -> retrieveBranchesForProject(username, projectsData.name()))
@@ -50,14 +72,9 @@ public class RepositoryService {
                 .collect(Collectors.toList());
     }
 
-    public List<RepositoryEntity> findAll() {
-        return gitHubRepository.findAll();
-
-    }
-    public Optional<RepositoryEntity> findById(Long id) {
-        return gitHubRepository.findById(id);
-    }
-    public RepositoryEntity save(RepositoryEntity entity){
-        return gitHubRepository.save(entity);
+    private List<RepositoryEntity> generateRepositoryEntityList(List<UserProjectsDataDto> userProjectsData) {
+        return userProjectsData.stream()
+                .map(s -> new RepositoryEntity(s.owner().login(), s.name()))
+                .collect(Collectors.toList());
     }
 }

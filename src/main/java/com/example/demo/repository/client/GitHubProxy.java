@@ -1,7 +1,7 @@
 package com.example.demo.repository.client;
 
 import com.example.demo.repository.client.dto.GitHubBranchInfoResponseDto;
-import com.example.demo.repository.client.dto.UserProjectsData;
+import com.example.demo.repository.client.dto.UserProjectsDataDto;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.ParameterizedTypeReference;
@@ -24,9 +24,9 @@ public class GitHubProxy {
         this.restTemplate = restTemplate;
     }
 
-    public List<UserProjectsData> downloadUsersRepos(String userName) {
+    public List<UserProjectsDataDto> downloadUsersRepos(String userName) {
         String uri = url + "/users/" + userName + "/repos";
-        ResponseEntity<List<UserProjectsData>> response = restTemplate.exchange(
+        ResponseEntity<List<UserProjectsDataDto>> response = restTemplate.exchange(
                 uri,
                 HttpMethod.GET,
                 null,

@@ -1,4 +1,4 @@
 package com.example.demo.repository.client.dto;
 
-public record Commit(String sha) {
+public record CommitDto(String sha) {
 }
