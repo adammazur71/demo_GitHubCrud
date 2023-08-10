@@ -5,6 +5,8 @@ import com.example.demo.repository.dto.ProjectInfoDto;
 import com.example.demo.repository.dto.ProjectRequestDto;
 import com.example.demo.repository.dto.RepositoryResponseDto;
 import com.example.demo.repository.exceptions.IdNotFoundException;
+import jakarta.validation.Valid;
+import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -14,6 +16,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 @RestController
+@Log4j2
 public class RepositoryController {
 
     RepositoryService repositoryService;
@@ -38,6 +41,7 @@ public class RepositoryController {
 
     @GetMapping(value = "/save2db/{username}", produces = "application/json")
     public ResponseEntity<List<RepositoryEntity>> saveRepos2db(@PathVariable String username) {
+        log.info("saved " + username +"'s projects info to DB");
         List<UserProjectsDataDto> projectInfoDtos = repositoryService.makeGitHubRequestForUserProjects(username);
         List<RepositoryEntity> savedRequests = repositoryService.saveProjectInfo2DB(projectInfoDtos);
         return ResponseEntity.ok(savedRequests);
@@ -58,7 +62,7 @@ public class RepositoryController {
     }
 
     @PostMapping(value = "/repos")
-    public ResponseEntity<RepositoryEntity> saveProject(@RequestBody ProjectRequestDto request) {
+    public ResponseEntity<RepositoryEntity> saveProject(@RequestBody @Valid ProjectRequestDto request) {
         RepositoryEntity savedProject = repositoryService.save(new RepositoryEntity(request.owner(), request.name()));
         return ResponseEntity.ok(savedProject);
     }
