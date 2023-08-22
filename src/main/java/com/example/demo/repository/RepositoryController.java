@@ -8,12 +8,15 @@ import com.example.demo.repository.exceptions.IdNotFoundException;
 import jakarta.validation.Valid;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.ArrayList;
 import java.util.List;
+
+import static com.example.demo.repository.RepositoryMapper.mapFromProjectRequestDtoToRepositoryEntity;
 
 @RestController
 @Log4j2
@@ -41,7 +44,7 @@ public class RepositoryController {
 
     @GetMapping(value = "/save2db/{username}", produces = "application/json")
     public ResponseEntity<List<RepositoryEntity>> saveRepos2db(@PathVariable String username) {
-        log.info("saved " + username +"'s projects info to DB");
+        log.info("saved " + username + "'s projects info to DB");
         List<UserProjectsDataDto> projectInfoDtos = repositoryService.makeGitHubRequestForUserProjects(username);
         List<RepositoryEntity> savedRequests = repositoryService.saveProjectInfo2DB(projectInfoDtos);
         return ResponseEntity.ok(savedRequests);
@@ -55,16 +58,20 @@ public class RepositoryController {
     }
 
     @GetMapping(value = "/repos/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<RepositoryEntity> showById(@PathVariable Long id) throws IdNotFoundException {
+    public ResponseEntity<RepositoryResponseByIdDto> showById(@PathVariable Long id) throws IdNotFoundException {
         RepositoryEntity resultById = repositoryService.findById(id)
                 .orElseThrow(() -> new IdNotFoundException("Result with id " + id + " not found"));
-        return ResponseEntity.ok(resultById);
+        RepositoryResponseByIdDto response = new RepositoryResponseByIdDto(resultById.getId(), resultById.getOwner(), resultById.getName());
+        return ResponseEntity.ok(response);
     }
 
     @PostMapping(value = "/repos")
-    public ResponseEntity<RepositoryEntity> saveProject(@RequestBody @Valid ProjectRequestDto request) {
-        RepositoryEntity savedProject = repositoryService.save(new RepositoryEntity(request.owner(), request.name()));
-        return ResponseEntity.ok(savedProject);
+    public ResponseEntity<RepositoryPostRequestDto> saveProject(@RequestBody @Valid ProjectRequestDto request) {
+//       RepositoryEntity repositoryEntity = mapFromProjectRequestDtoToRepositoryEntity(request);
+        RepositoryEntity savedProject = repositoryService.save(mapFromProjectRequestDtoToRepositoryEntity(request));
+        RepositoryPostRequestDto postRequest = new RepositoryPostRequestDto(savedProject.getId(), savedProject.owner, savedProject.name);
+        return ResponseEntity.status(HttpStatus.CREATED)
+                .body(postRequest);
     }
 
 }
