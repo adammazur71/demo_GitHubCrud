@@ -1,9 +1,7 @@
 package com.example.demo.repository;
 
 import com.example.demo.repository.client.dto.UserProjectsDataDto;
-import com.example.demo.repository.dto.ProjectInfoDto;
-import com.example.demo.repository.dto.ProjectRequestDto;
-import com.example.demo.repository.dto.RepositoryResponseDto;
+import com.example.demo.repository.dto.*;
 import com.example.demo.repository.exceptions.IdNotFoundException;
 import jakarta.validation.Valid;
 import lombok.extern.log4j.Log4j2;
