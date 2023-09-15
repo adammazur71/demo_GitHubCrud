@@ -64,6 +64,7 @@ public class RepositoryController {
     }
 
     @PostMapping(value = "/repos")
+    @ResponseStatus(HttpStatus.CREATED)
     public ResponseEntity<RepositoryPostRequestDto> saveProject(@RequestBody @Valid ProjectRequestDto request) {
 //       RepositoryEntity repositoryEntity = mapFromProjectRequestDtoToRepositoryEntity(request);
         RepositoryEntity savedProject = repositoryService.save(mapFromProjectRequestDtoToRepositoryEntity(request));
