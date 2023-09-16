@@ -11,7 +11,6 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import static com.example.demo.repository.RepositoryMapper.mapFromProjectRequestDtoToRepositoryEntity;
@@ -21,7 +20,7 @@ import static com.example.demo.repository.RepositoryMapper.mapFromProjectRequest
 public class RepositoryController {
 
     RepositoryService repositoryService;
-    List<ProjectInfoDto> cache = new ArrayList<>();
+   // List<ProjectInfoDto> cache = new ArrayList<>();
 
     @Autowired
 
@@ -30,17 +29,17 @@ public class RepositoryController {
 
     }
 
-    @GetMapping(value = "/{username}", produces = "application/json")
+    @GetMapping(value = "/projects-info/{username}", produces = "application/json")
     public ResponseEntity<RepositoryResponseDto> hello(@PathVariable String username) {
-        if (!cache.isEmpty()) {
-            return ResponseEntity.ok(new RepositoryResponseDto(cache));
-        }
+//        if (!cache.isEmpty()) {
+//            return ResponseEntity.ok(new RepositoryResponseDto(cache));
+//        }
         List<ProjectInfoDto> projectInfoDtos = repositoryService.projectInfoDtos(username);
-        cache = projectInfoDtos;
+       // cache = projectInfoDtos;
         return ResponseEntity.ok(new RepositoryResponseDto(projectInfoDtos));
     }
 
-    @GetMapping(value = "/save2db/{username}", produces = "application/json")
+    @GetMapping(value = "/save-projects-info/{username}", produces = "application/json")
     public ResponseEntity<List<RepositoryEntity>> saveRepos2db(@PathVariable String username) {
         log.info("saved " + username + "'s projects info to DB");
         List<UserProjectsDataDto> projectInfoDtos = repositoryService.makeGitHubRequestForUserProjects(username);

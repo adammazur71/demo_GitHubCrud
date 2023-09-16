@@ -126,7 +126,7 @@ class RepositoryIntegrationTest {
                 ));
 
         //WHEN
-        ResultActions resultByGetFromGitHub = mockMvc.perform(get("/save2db/adammazur71"));
+        ResultActions resultByGetFromGitHub = mockMvc.perform(get("/save-projects-info/adammazur71"));
         //THEN
         resultByGetFromGitHub.andExpect(status().isOk());
         resultByGetFromGitHub.andExpect(jsonPath("$[0]['id']").value(2));
