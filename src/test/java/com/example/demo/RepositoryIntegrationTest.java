@@ -112,7 +112,7 @@ class RepositoryIntegrationTest {
                 """.trim()));
 
 
-        //7. Użytkownik chce wyświetlić repo po ID=1. (zapytanie get na endpoint repos/3)
+        //7. Użytkownik chce wyświetlić repo po ID=1. (zapytanie get na endpoint repos/1)
         //8. Serwer odpowiada kodem 200 i wyświetla repo z ID=1.
         //WHEN
         ResultActions resultByGetFromDB = mockMvc.perform(get("/repos/1"));
@@ -129,21 +129,25 @@ class RepositoryIntegrationTest {
         // danych. (zapytanie GET na endpoint /save2db/adammazur71)
         //GIVEN
         String responseFromGitHub = Files.readString(Path.of("src/test/resources/responseFromGitHub.json"));
-        stubFor(WireMock.get(urlEqualTo("/save2db/adammazur71"))
+        stubFor(WireMock.get(urlEqualTo("/users/adammazur71/repos"))
                 .willReturn(
                         aResponse()
                                 .withStatus(200)
                                 .withHeader("Content-Type", "application/json")
                                 .withBody(responseFromGitHub)
                 ));
+
         //WHEN
         ResultActions resultByGetFromGitHub = mockMvc.perform(get("/save2db/adammazur71"));
         //THEN
+        resultByGetFromGitHub.andExpect(status().isOk());
+        resultByGetFromGitHub.andExpect(content().json("[{\"id\":51,\"owner\":\"adammazur71\",\"name\":\"demo_GitHubCrud\"},{\"id\":52,\"owner\":\"adammazur71\",\"name\":\"githubproject2\"},{\"id\":53,\"owner\":\"adammazur71\",\"name\":\"lottery_game\"},{\"id\":54,\"owner\":\"adammazur71\",\"name\":\"openfeignproblem\"}]"));
+
 
         }
 
 
-    }
+
 
     @Test
     void shouldCreateNewRepositoryEntityWithCode201() throws Exception {
