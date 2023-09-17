@@ -30,7 +30,7 @@ public class RepositoryController {
     }
 
     @GetMapping(value = "/projects-info/{username}", produces = "application/json")
-    public ResponseEntity<RepositoryResponseDto> hello(@PathVariable String username) {
+    public ResponseEntity<RepositoryResponseDto> showUserNoForksReposWithBranchesInfo(@PathVariable String username) {
 //        if (!cache.isEmpty()) {
 //            return ResponseEntity.ok(new RepositoryResponseDto(cache));
 //        }

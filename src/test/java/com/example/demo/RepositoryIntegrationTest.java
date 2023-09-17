@@ -1,8 +1,8 @@
 package com.example.demo;
 
-import com.example.demo.repository.RepositoryController;
 import com.github.tomakehurst.wiremock.client.WireMock;
 import com.github.tomakehurst.wiremock.junit5.WireMockTest;
+import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -10,8 +10,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
-import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.ResultActions;
+import org.springframework.test.web.servlet.*;
 import org.testcontainers.containers.PostgreSQLContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
@@ -32,9 +31,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 class RepositoryIntegrationTest {
     @Autowired
     MockMvc mockMvc;
-    @Autowired
-    RepositoryController repositoryController;
-
 
     @Container
     public static PostgreSQLContainer postgreSQLContainer = new PostgreSQLContainer("postgres:15.4")
@@ -115,6 +111,7 @@ class RepositoryIntegrationTest {
                 """.trim()));
         //9. Użytkownik chce pobrać informacje o repozytoriach użytkownika "adammazur71" z GitHuba i zapisać je do bazy
         // danych. (zapytanie GET na endpoint /save2db/adammazur71)
+
         //GIVEN
         String responseFromGitHub = Files.readString(Path.of("src/test/resources/responseFromGitHub.json"));
         stubFor(WireMock.get(urlEqualTo("/users/adammazur71/repos"))
@@ -132,5 +129,41 @@ class RepositoryIntegrationTest {
         resultByGetFromGitHub.andExpect(jsonPath("$[0]['id']").value(2));
         resultByGetFromGitHub.andExpect(jsonPath("$[0]['owner']").value("adammazur71"));
         resultByGetFromGitHub.andExpect(jsonPath("$[0]['name']").value("demo_GitHubCrud"));
+    }
+
+    @Test
+    void shouldGetUserNoForkProjectsWithBranchInfo() throws Exception {
+        // 10. Użytkownik chce wyświetlić listę repozytoriów, które nie są forkami
+        // wraz z branchami i SHA ostatniego commita. (GET na /projects-info/adammazur
+
+        //GIVEN
+        String responseFromGitHub2 = Files.readString(Path.of("src/test/resources/responseFromGitHubWith1ForkAnd1NoFork.json"));
+        String responseFromGitHubWithBranchesInfo = Files.readString(Path.of("src/test/resources/responseFromGitHubWithBranchesInfo.json"));
+        stubFor(WireMock.get(urlEqualTo("/users/adammazur/repos"))
+                .willReturn(
+                        aResponse()
+                                .withStatus(200)
+                                .withHeader("Content-Type", "application/json")
+                                .withBody(responseFromGitHub2)
+                ));
+        stubFor(WireMock.get(urlEqualTo("/repos/adammazur/demo_GitHubCrud/branches"))
+                .willReturn(
+                        aResponse()
+                                .withStatus(200)
+                                .withHeader("Content-Type", "application/json")
+                                .withBody(responseFromGitHubWithBranchesInfo)
+                ));
+        //WHEN
+        ResultActions resultByGetBranchesInfoFromGitHub = mockMvc.perform(get("/projects-info/adammazur"));
+
+        //THEN
+        resultByGetBranchesInfoFromGitHub.andExpect(status().isOk());
+        resultByGetBranchesInfoFromGitHub.andExpect(jsonPath("$['projectInfoDto'][0]['branchDto'][0]['branchName']").value("holidays"));
+        resultByGetBranchesInfoFromGitHub.andExpect(jsonPath("$['projectInfoDto'][0]['branchDto'][0]['sha']").value("2a034cbecd36c23d9afe735520856b4b11024881"));
+        resultByGetBranchesInfoFromGitHub.andExpect(jsonPath("$['projectInfoDto'][0]['branchDto'][1]['branchName']").value("master"));
+        resultByGetBranchesInfoFromGitHub.andExpect(jsonPath("$['projectInfoDto'][0]['branchDto'][1]['sha']").value("c163b39eefc1f10242c3f83916850a7726666e4b"));
+        resultByGetBranchesInfoFromGitHub.andExpect(jsonPath("$['projectInfoDto'][0]['repoName']").value("demo_GitHubCrud"));
+        boolean isForkInResponse = resultByGetBranchesInfoFromGitHub.andReturn().getResponse().getContentAsString().contains("FORK_demo_GitHubCrud");
+        Assertions.assertThat(isForkInResponse).isFalse();
     }
 }
