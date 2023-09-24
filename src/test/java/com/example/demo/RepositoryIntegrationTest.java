@@ -123,7 +123,7 @@ class RepositoryIntegrationTest {
                 ));
 
         //WHEN
-        ResultActions resultByGetFromGitHub = mockMvc.perform(get("/save-projects-info/adammazur71"));
+        ResultActions resultByGetFromGitHub = mockMvc.perform(get("/save-projects/adammazur71"));
         //THEN
         resultByGetFromGitHub.andExpect(status().isOk());
         resultByGetFromGitHub.andExpect(jsonPath("$[0]['id']").value(2));
@@ -165,5 +165,6 @@ class RepositoryIntegrationTest {
         resultByGetBranchesInfoFromGitHub.andExpect(jsonPath("$['projectInfoDto'][0]['repoName']").value("demo_GitHubCrud"));
         boolean isForkInResponse = resultByGetBranchesInfoFromGitHub.andReturn().getResponse().getContentAsString().contains("FORK_demo_GitHubCrud");
         Assertions.assertThat(isForkInResponse).isFalse();
+
     }
 }

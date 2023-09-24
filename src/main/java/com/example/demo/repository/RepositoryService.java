@@ -41,19 +41,25 @@ public class RepositoryService {
         return gitHubRepository.saveAll(entities);
     }
 
-    public List<ProjectInfoDto> projectInfoDtos(String username) {
+    public List<ProjectInfoDto> downloadProjectInfoDtos(String username) {
         List<UserProjectsDataDto> response = makeGitHubRequestForUserProjects(username);
-        return generateProjectInfoDtos(response, username);
+        return generateNoForkProjectInfoDtos(response, username);
     }
 
     public List<UserProjectsDataDto> makeGitHubRequestForUserProjects(String userName) {
         return gitHubProxy.downloadUsersRepos(userName);
     }
 
-    public List<RepositoryEntity> saveProjectInfo2DB(List<UserProjectsDataDto> userProjectsData) {
+    public List<RepositoryEntity> saveProjects2db(List<UserProjectsDataDto> userProjectsData) {
         List<RepositoryEntity> projects2save = generateRepositoryEntityList(userProjectsData);
         return saveAll(projects2save);
     }
+
+    public List<RepositoryEntity> saveProjectsWithBranchInfo2db(List<ProjectInfoDto> projectInfoDtos) {
+        List<RepositoryEntity> projects2save = generateRepositoryEntityListWithBranchesInfo(projectInfoDtos);
+        return saveAll(projects2save);
+    }
+
 
     private BranchWithRepoNameDto retrieveBranchesForProject(String userName, String projectName) {
         List<GitHubBranchInfoResponseDto> branchInfoResponse = gitHubProxy.downloadUsersReposBranchesInfo(userName, projectName);
@@ -64,7 +70,7 @@ public class RepositoryService {
         return new BranchWithRepoNameDto(branchDtos, projectName);
     }
 
-    private List<ProjectInfoDto> generateProjectInfoDtos(List<UserProjectsDataDto> userProjectsData, String username) {
+    private List<ProjectInfoDto> generateNoForkProjectInfoDtos(List<UserProjectsDataDto> userProjectsData, String username) {
         return userProjectsData.stream()
                 .filter(projectsData -> !projectsData.fork())
                 .map(projectsData -> retrieveBranchesForProject(username, projectsData.name()))
@@ -77,4 +83,13 @@ public class RepositoryService {
                 .map(s -> new RepositoryEntity(s.owner().login(), s.name()))
                 .collect(Collectors.toList());
     }
+
+    private List<RepositoryEntity> generateRepositoryEntityListWithBranchesInfo(List<ProjectInfoDto> projectInfoDtos) {
+        return projectInfoDtos.stream()
+                .map(s -> new RepositoryEntity(s.ownerLogin(), s.repoName(), s.branchDto().stream()
+                        .map(d -> new BranchInfoEntity(d.branchName(), d.sha()))
+                        .collect(Collectors.toSet())))
+                .toList();
+    }
+
 }
