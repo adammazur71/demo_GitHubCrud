@@ -41,7 +41,7 @@ public class RepositoryService {
         return gitHubRepository.saveAll(entities);
     }
 
-    public List<ProjectInfoDto> downloadProjectInfoDtos(String username) {
+    public List<ProjectInfoDto> downloadNoForkProjectInfoDtos(String username) {
         List<UserProjectsDataDto> response = makeGitHubRequestForUserProjects(username);
         return generateNoForkProjectInfoDtos(response, username);
     }

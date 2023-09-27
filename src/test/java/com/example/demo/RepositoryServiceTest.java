@@ -1,37 +1,35 @@
 package com.example.demo;
 
 import com.example.demo.repository.BranchInfoEntity;
+import com.example.demo.repository.GitHubRepository;
 import com.example.demo.repository.RepositoryEntity;
 import com.example.demo.repository.RepositoryService;
+import com.example.demo.repository.client.GitHubProxy;
+import com.example.demo.repository.client.dto.GitHubRepositoryOwnerDto;
+import com.example.demo.repository.client.dto.UserProjectsDataDto;
 import com.example.demo.repository.dto.BranchDto;
 import com.example.demo.repository.dto.ProjectInfoDto;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.testcontainers.containers.PostgreSQLContainer;
-import org.testcontainers.junit.jupiter.Container;
-import org.testcontainers.junit.jupiter.Testcontainers;
+import org.mockito.Mockito;
 
 import java.util.List;
 import java.util.Set;
 
 import static org.assertj.core.api.AssertionsForClassTypes.tuple;
+import static org.mockito.AdditionalAnswers.returnsFirstArg;
+import static org.mockito.ArgumentMatchers.anyList;
+import static org.mockito.Mockito.when;
 
-@SpringBootTest
-@Testcontainers
 public class RepositoryServiceTest {
 
-    @Autowired
-    RepositoryService repositoryService;
-    @Container
-    public static PostgreSQLContainer postgreSQLContainer = new PostgreSQLContainer("postgres:15.4")
-            .withDatabaseName("integration-tests-db")
-            .withUsername("user")
-            .withPassword("admin");
+
+    GitHubProxy gitHubProxyMock = Mockito.mock(GitHubProxy.class);
+    GitHubRepository gitHubRepositoryMock = Mockito.mock(GitHubRepository.class);
+    RepositoryService repositoryService = new RepositoryService(gitHubProxyMock, gitHubRepositoryMock);
 
     @Test
-    void shouldReturnRepositoryEntityListWithCorrectBranchesInfoWhenResponseFromGitHubHasAllInfo() {
+    void shouldReturnRepositoryEntityListWithCorrectBranchesInfoWhenResponseFromGitHubHasBranchesInfo() {
         //GIVEN
         ProjectInfoDto repo1 = new ProjectInfoDto("repo", "owner", List.of(
                 BranchDto.builder()
@@ -49,36 +47,8 @@ public class RepositoryServiceTest {
         List<ProjectInfoDto> projectInfoDtos = List.of(
                 repo1, repo2);
 
+        when(gitHubRepositoryMock.saveAll(anyList())).thenAnswer(returnsFirstArg());
 
-        List<RepositoryEntity> expectedRepositoryEntities = List.of(
-                RepositoryEntity.builder()
-                        .id(1L)
-                        .owner("owner")
-                        .name("repo")
-                        .branchInfoEntity(Set.of(
-                                BranchInfoEntity.builder()
-                                        .branchId(1L)
-                                        .branchName("branch")
-                                        .sha("sha")
-                                        .build(),
-                                BranchInfoEntity.builder()
-                                        .branchId(2L)
-                                        .branchName("branch-1-2")
-                                        .sha("sha1-2")
-                                        .build()))
-                        .build(),
-                RepositoryEntity.builder()
-                        .id(2L)
-                        .owner("owner2")
-                        .name("repo2")
-                        .branchInfoEntity(Set.of(
-                                BranchInfoEntity.builder()
-                                        .branchId(3L)
-                                        .branchName("branch2")
-                                        .sha("sha2")
-                                        .build()
-                        ))
-                        .build());
 
         //WHEN
         List<RepositoryEntity> repositoryEntities = repositoryService.saveProjectsWithBranchInfo2db(projectInfoDtos);
@@ -87,16 +57,37 @@ public class RepositoryServiceTest {
         Assertions.assertThat(repositoryEntities)
                 .extracting(RepositoryEntity::getOwner, RepositoryEntity::getName)
                 .containsExactly(tuple("owner", "repo"), tuple("owner2", "repo2"));
-//        Assertions.assertThat(repositoryEntities)
-//                .extracting(entity -> entity.getBranchInfoEntity())
-//                .containsExactlyInAnyOrder((Set.of(
-//                                new BranchInfoEntity(1L, "branch-1-2", "sha-1-2"),
-//                                new BranchInfoEntity(2L, "branch", "sha"))),
-//                        Set.of(
-//                                new BranchInfoEntity(3L, "branch2", "sha2")
-//                        ));
-
-
+        Assertions.assertThat(repositoryEntities)
+                .extracting(RepositoryEntity::getBranchInfoEntity)
+                .containsExactlyInAnyOrder((Set.of(
+                                new BranchInfoEntity("branch-1-2", "sha-1-2"),
+                                new BranchInfoEntity("branch", "sha"))),
+                        Set.of(
+                                new BranchInfoEntity("branch2", "sha2")
+                        ));
     }
+    @Test
+    void shouldReturnRepositoryEntityListWhenResponseFromGitHubIsWithoutBranchesInfo() {
+        //GIVEN
+        UserProjectsDataDto userProjectsDataDto1 = new UserProjectsDataDto
+                (new GitHubRepositoryOwnerDto("owner1"), "name1", false);
+        UserProjectsDataDto userProjectsDataDto2 = new UserProjectsDataDto
+                (new GitHubRepositoryOwnerDto("owner2"), "name2", true);
+        UserProjectsDataDto userProjectsDataDto3= new UserProjectsDataDto
+                (new GitHubRepositoryOwnerDto("owner3"), "name3", false);
+        UserProjectsDataDto userProjectsDataDto4 = new UserProjectsDataDto
+                (new GitHubRepositoryOwnerDto("owner4"), "name4", true);
 
+        List<UserProjectsDataDto> userProjectsDataDtos = List.of(userProjectsDataDto1,userProjectsDataDto2,userProjectsDataDto3, userProjectsDataDto4);
+        when(gitHubRepositoryMock.saveAll(anyList())).thenAnswer(returnsFirstArg());
+
+        //WHEN
+        List<RepositoryEntity> repositoryEntities = repositoryService.saveProjects2db(userProjectsDataDtos);
+
+        //THEN
+        Assertions.assertThat(repositoryEntities)
+                .extracting(RepositoryEntity::getOwner, RepositoryEntity::getName)
+                .containsExactly(tuple("owner1", "name1"),tuple("owner2", "name2"), tuple("owner3", "name3"),tuple("owner4", "name4"));
+    }
 }
+
