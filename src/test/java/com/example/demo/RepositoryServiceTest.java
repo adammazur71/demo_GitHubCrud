@@ -66,6 +66,7 @@ public class RepositoryServiceTest {
                                 new BranchInfoEntity("branch2", "sha2")
                         ));
     }
+
     @Test
     void shouldReturnRepositoryEntityListWhenResponseFromGitHubIsWithoutBranchesInfo() {
         //GIVEN
@@ -73,12 +74,12 @@ public class RepositoryServiceTest {
                 (new GitHubRepositoryOwnerDto("owner1"), "name1", false);
         UserProjectsDataDto userProjectsDataDto2 = new UserProjectsDataDto
                 (new GitHubRepositoryOwnerDto("owner2"), "name2", true);
-        UserProjectsDataDto userProjectsDataDto3= new UserProjectsDataDto
+        UserProjectsDataDto userProjectsDataDto3 = new UserProjectsDataDto
                 (new GitHubRepositoryOwnerDto("owner3"), "name3", false);
         UserProjectsDataDto userProjectsDataDto4 = new UserProjectsDataDto
                 (new GitHubRepositoryOwnerDto("owner4"), "name4", true);
 
-        List<UserProjectsDataDto> userProjectsDataDtos = List.of(userProjectsDataDto1,userProjectsDataDto2,userProjectsDataDto3, userProjectsDataDto4);
+        List<UserProjectsDataDto> userProjectsDataDtos = List.of(userProjectsDataDto1, userProjectsDataDto2, userProjectsDataDto3, userProjectsDataDto4);
         when(gitHubRepositoryMock.saveAll(anyList())).thenAnswer(returnsFirstArg());
 
         //WHEN
@@ -87,7 +88,33 @@ public class RepositoryServiceTest {
         //THEN
         Assertions.assertThat(repositoryEntities)
                 .extracting(RepositoryEntity::getOwner, RepositoryEntity::getName)
-                .containsExactly(tuple("owner1", "name1"),tuple("owner2", "name2"), tuple("owner3", "name3"),tuple("owner4", "name4"));
+                .containsExactly(tuple("owner1", "name1"), tuple("owner2", "name2"), tuple("owner3", "name3"), tuple("owner4", "name4"));
     }
+
+    @Test
+    void shouldGetNoForkProjectsFromGitHub() {
+        //GIVEN
+        String userName = "owner";
+        UserProjectsDataDto userProjectsDataDto1 = new UserProjectsDataDto
+                (new GitHubRepositoryOwnerDto("owner"), "name1", false);
+        UserProjectsDataDto userProjectsDataDto2 = new UserProjectsDataDto
+                (new GitHubRepositoryOwnerDto("owner"), "name2", true);
+        UserProjectsDataDto userProjectsDataDto3 = new UserProjectsDataDto
+                (new GitHubRepositoryOwnerDto("owner"), "name3", false);
+        UserProjectsDataDto userProjectsDataDto4 = new UserProjectsDataDto
+                (new GitHubRepositoryOwnerDto("owner"), "name4", true);
+        List<UserProjectsDataDto> responseFromGitHub = List.of(userProjectsDataDto1, userProjectsDataDto2, userProjectsDataDto3, userProjectsDataDto4);
+        when(gitHubProxyMock.downloadUsersRepos(userName)).thenReturn(responseFromGitHub);
+
+        //WHEN
+        List<UserProjectsDataDto> userProjectsDataDtos = repositoryService.downloadNoForkProjects(userName);
+
+        //THEN
+        Assertions.assertThat(userProjectsDataDtos)
+                .extracting(UserProjectsDataDto::name)
+                .containsExactlyInAnyOrder("name1", "name3");
+
+    }
+
 }
 

@@ -30,21 +30,22 @@ public class RepositoryController {
 
     @GetMapping(value = "/no-forks/{username}", produces = "application/json")
     public ResponseEntity<RepositoryResponseDto> showUserNoForksReposWithBranchesInfo(@PathVariable String username) {
-        List<ProjectInfoDto> projectInfoDtos = repositoryService.downloadNoForkProjectInfoDtos(username);
+        List<ProjectInfoDto> projectInfoDtos = repositoryService.downloadNoForkProjectsWithBranchesInfoDtos(username);
         return ResponseEntity.ok(new RepositoryResponseDto(projectInfoDtos));
     }
 
     @GetMapping(value = "/save-no-forks-with-branches-info/{username}", produces = "application/json")
     public ResponseEntity<List<RepositoryEntity>> saveProjectsWithBranchesInfo2db(@PathVariable String username) {
-        List<ProjectInfoDto> projectInfoDtos = repositoryService.downloadNoForkProjectInfoDtos(username);
+        log.info("saved " + username + "'s no forks with branches to DB");
+        List<ProjectInfoDto> projectInfoDtos = repositoryService.downloadNoForkProjectsWithBranchesInfoDtos(username);
         List<RepositoryEntity> savedRequest = repositoryService.saveProjectsWithBranchInfo2db(projectInfoDtos);
         return ResponseEntity.ok(savedRequest);
     }
 
-    @GetMapping(value = "/save-all-projects/{username}", produces = "application/json")
+    @GetMapping(value = "/save-no-forks/{username}", produces = "application/json")
     public ResponseEntity<List<RepositoryEntity>> saveRepos2db(@PathVariable String username) {
-        log.info("saved " + username + "'s projects info to DB");
-        List<UserProjectsDataDto> projectInfoDtos = repositoryService.makeGitHubRequestForUserProjects(username);
+        log.info("saved " + username + "'s no forks to DB");
+        List<UserProjectsDataDto> projectInfoDtos = repositoryService.downloadNoForkProjects(username);
         List<RepositoryEntity> savedRequests = repositoryService.saveProjects2db(projectInfoDtos);
         return ResponseEntity.ok(savedRequests);
     }

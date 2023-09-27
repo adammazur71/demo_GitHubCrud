@@ -41,13 +41,15 @@ public class RepositoryService {
         return gitHubRepository.saveAll(entities);
     }
 
-    public List<ProjectInfoDto> downloadNoForkProjectInfoDtos(String username) {
+    public List<ProjectInfoDto> downloadNoForkProjectsWithBranchesInfoDtos(String username) {
         List<UserProjectsDataDto> response = makeGitHubRequestForUserProjects(username);
-        return generateNoForkProjectInfoDtos(response, username);
+        List<UserProjectsDataDto> noForkResponse = filterOutForks(response);
+        return generateProjectInfoDtos(noForkResponse, username);
     }
 
-    public List<UserProjectsDataDto> makeGitHubRequestForUserProjects(String userName) {
-        return gitHubProxy.downloadUsersRepos(userName);
+    public List<UserProjectsDataDto> downloadNoForkProjects(String username) {
+        List<UserProjectsDataDto> response = makeGitHubRequestForUserProjects(username);
+        return filterOutForks(response);
     }
 
     public List<RepositoryEntity> saveProjects2db(List<UserProjectsDataDto> userProjectsData) {
@@ -60,6 +62,9 @@ public class RepositoryService {
         return saveAll(projects2save);
     }
 
+    private List<UserProjectsDataDto> makeGitHubRequestForUserProjects(String userName) {
+        return gitHubProxy.downloadUsersRepos(userName);
+    }
 
     private BranchWithRepoNameDto retrieveBranchesForProject(String userName, String projectName) {
         List<GitHubBranchInfoResponseDto> branchInfoResponse = gitHubProxy.downloadUsersReposBranchesInfo(userName, projectName);
@@ -70,9 +75,14 @@ public class RepositoryService {
         return new BranchWithRepoNameDto(branchDtos, projectName);
     }
 
-    private List<ProjectInfoDto> generateNoForkProjectInfoDtos(List<UserProjectsDataDto> userProjectsData, String username) {
+    private List<UserProjectsDataDto> filterOutForks(List<UserProjectsDataDto> userProjectsDataDtos) {
+        return userProjectsDataDtos.stream()
+                .filter(s -> !s.fork())
+                .toList();
+    }
+
+    private List<ProjectInfoDto> generateProjectInfoDtos(List<UserProjectsDataDto> userProjectsData, String username) {
         return userProjectsData.stream()
-                .filter(projectsData -> !projectsData.fork())
                 .map(projectsData -> retrieveBranchesForProject(username, projectsData.name()))
                 .map(branchWithRepoNameDto -> new ProjectInfoDto(branchWithRepoNameDto.repoName(), username, branchWithRepoNameDto.branchesDto()))
                 .collect(Collectors.toList());
