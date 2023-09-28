@@ -10,6 +10,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @Service
@@ -96,10 +97,13 @@ public class RepositoryService {
 
     private List<RepositoryEntity> generateRepositoryEntityListWithBranchesInfo(List<ProjectInfoDto> projectInfoDtos) {
         return projectInfoDtos.stream()
-                .map(s -> new RepositoryEntity(s.ownerLogin(), s.repoName(), s.branchDto().stream()
-                        .map(d -> new BranchInfoEntity(d.branchName(), d.sha()))
-                        .collect(Collectors.toSet())))
+                .map(projectInfoDto -> new RepositoryEntity(projectInfoDto.ownerLogin(), projectInfoDto.repoName(), mapToBranchInfoEntity(projectInfoDto.branchDto())))
                 .toList();
     }
 
+    private Set<BranchInfoEntity> mapToBranchInfoEntity(List<BranchDto> branchDtos) {
+        return branchDtos.stream()
+                .map(d -> new BranchInfoEntity(d.branchName(), d.sha()))
+                .collect(Collectors.toSet());
+    }
 }
